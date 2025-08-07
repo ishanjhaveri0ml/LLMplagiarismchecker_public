@@ -1,0 +1,24 @@
+import openai
+import os
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def explain_similarity(user_text: str, match_text: str) -> str:
+    if not openai.api_key:
+        return "Missing OpenAI API key."
+    prompt = (
+        "Compare the following user-written text with a web-sourced text. "
+        "Identify similarities, possible plagiarism, and explain why.\n\n"
+        f'User Text:\n"""{user_text}"""\n\n'
+        f'Web Text:\n"""{match_text}"""\n\n'
+        "Plagiarism Assessment:"
+    )
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+        )
+        return response['choices'][0]['message']['content']
+    except Exception as e:
+        return f"LLM explanation failed: {str(e)}"
